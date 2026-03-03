@@ -1,0 +1,6 @@
+# Hadolint configuration
+# See: https://github.com/hadolint/hadolint
+
+ignored:
+  - DL3008 # Pin versions in apt get (we use python images which are managed)
+  - DL3013 # Pin versions in pip (we pin in requirements.txt)
