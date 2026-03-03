@@ -43,16 +43,24 @@ docker run -d --name security-app -p 5001:5000 security-lab:hardened
 - **Python-native Health Check**: Removes `curl` from the runtime image to reduce attack surface.
 - **Production Server**: Uses `Gunicorn` instead of the Flask development server.
 
-## Automated Security
+## Automated Security & Deployment
 
 This project includes a GitHub Actions workflow that:
 
 1. **Lints the Dockerfile**: Uses `hadolint` to check for best practices.
 2. **Scans for CVEs**: Uses `Trivy` to block builds with High or Critical vulnerabilities.
+3. **Pushes to Docker Hub**: Automatically tags and pushes the hardened image to Docker Hub if all security checks pass.
+
+### CI/CD Setup (GitHub Secrets)
+
+To enable automatic pushing to Docker Hub, add the following secrets to your GitHub repository (**Settings > Secrets and variables > Actions**):
+
+- `DOCKERHUB_USERNAME`: Your Docker Hub username.
+- `DOCKERHUB_TOKEN`: A Personal Access Token (PAT) from Docker Hub.
 
 ### Verification
 
-To check the health of the running container:
+To check the health of the running container locally:
 
 ```bash
 docker inspect --format='{{json .State.Health}}' security-app
