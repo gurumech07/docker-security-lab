@@ -4,9 +4,14 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install dependencies
+# Upgrade pip and suppress warnings
+ENV PIP_ROOT_USER_ACTION=ignore \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --user -r requirements.txt
 
 # Phase 2: Runtime
 FROM python:3.11-slim-bullseye
