@@ -1,6 +1,6 @@
 # Docker Security Lab
 
-This project demonstrates container security best practices and vulnerability scanning with Docker Scout and Trivy.
+This project demonstrates container security best practices and automated vulnerability scanning using SonarCloud, Gitleaks, and Docker Scout.
 
 ## Project Structure
 
