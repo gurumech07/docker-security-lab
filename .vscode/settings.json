@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "gurumech07",
+        "projectKey": "gurumech07_my-python-app"
+    }
+}
