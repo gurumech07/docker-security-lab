@@ -47,9 +47,15 @@ docker run -d --name security-app -p 5001:5000 security-lab:hardened
 
 This project includes a GitHub Actions workflow that:
 
-1. **Lints the Dockerfile**: Uses `hadolint` to check for best practices.
-2. **SAST Analysis**: Uses **SonarQube (SonarCloud)** to analyze the Python source code and Dockerfile for security hotspots and code smells.
-3. **Pushes to Docker Hub**: Automatically tags and pushes the hardened image to Docker Hub if all security checks pass.
+1. **Secret Scanning**: Uses `gitleaks` to detect exposed credentials in the codebase.
+2. **Linting the Dockerfile**: Uses `hadolint` to check for best practices.
+3. **SAST Analysis**: Uses **SonarQube (SonarCloud)** to analyze code and Dockerfiles.
+4. **Vulnerability Comparison**: Uses **Docker Scout** to compare the hardened image against a legacy standard image, highlighting security wins.
+5. **Pushes to Docker Hub**: Automatically publishes the hardened image if all checks pass.
+
+### Interpreting Comparison Reports
+
+You can find the "Vulnerability Delta" in the **GitHub Actions > [Job Name] > Summary** page. Look for the Docker Scout section to see how many Critical and High vulnerabilities were removed by the hardening process.
 
 ### CI/CD Setup (GitHub Secrets)
 

@@ -29,45 +29,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  comparison:
-    name: Security Comparison (Std vs Hardened)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build Standard Image
-        run: docker build -t security-lab:std -f Dockerfile.std .
-
-      - name: Build Hardened Image
-        run: docker build -t security-lab:hardened -f Dockerfile .
-
-      - name: Docker Scout Comparison
-        uses: docker/scout-action@v1
-        with:
-          command: compare
-          image: security-lab:hardened
-          to: security-lab:std
-          ignore-unchanged: false
-          only-severities: critical,high
-          write-comment: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          DOCKER_HUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKER_HUB_PAT: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  build-and-push:
-    name: Build and Push
-    needs: [sonarcloud, comparison]
+  security-and-publish:
+    name: Security Scan, Compare & Publish
+    needs: sonarcloud
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
@@ -80,7 +55,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push
+      - name: Build Images
         run: |
+          docker build -t security-lab:std -f Dockerfile.std .
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:hardened -f Dockerfile .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:hardened
+
+      - name: Docker Scout Comparison
+        uses: docker/scout-action@v1
+        with:
+          command: compare
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:hardened
+          to: security-lab:std
+          ignore-unchanged: false
+          only-severities: critical,high
+          write-comment: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          DOCKER_HUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_HUB_PAT: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Hardened Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:hardened
