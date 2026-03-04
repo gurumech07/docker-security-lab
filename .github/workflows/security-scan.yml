@@ -16,13 +16,14 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       
       - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@master
+        uses: sonarsource/sonarqube-scan-action@v3
         with:
           args: >
             -Dsonar.projectKey=docker-security-lab
             -Dsonar.organization=gurumech07
             -Dsonar.sources=.
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
             -Dsonar.verbose=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
