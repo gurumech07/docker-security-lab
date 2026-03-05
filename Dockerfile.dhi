@@ -3,7 +3,8 @@
 # Requires `docker login dhi.io` before building
 
 # Phase 1: Builder
-FROM dhi.io/python:3.12-alpine3.20 AS builder
+# Use -dev variant for builder as it contains build tools and pip
+FROM dhi.io/python:3.12-alpine3.22-dev AS builder
 
 WORKDIR /app
 
@@ -17,8 +18,8 @@ RUN pip install --upgrade pip && \
     pip install --user -r requirements.txt
 
 # Phase 2: Runtime
-# Using the same hardened base for runtime
-FROM dhi.io/python:3.12-alpine3.20
+# Using the minimal runtime hardened base
+FROM dhi.io/python:3.12-alpine3.22
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
