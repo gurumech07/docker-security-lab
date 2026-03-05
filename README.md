@@ -72,3 +72,29 @@ To check the health of the running container locally:
 ```bash
 docker inspect --format='{{json .State.Health}}' security-app
 ```
+
+## 🚀 Docker Hardened Image (DHI) Comparison
+
+We've introduced a third Dockerfile approach using **Docker Hardened Images (DHI)** for comparison.
+
+### Dockerfile Variants
+
+1.  **`Dockerfile.std`**: Standard, unhardened base. High attack surface.
+2.  **`Dockerfile`**: Manually hardened using multi-stage builds and non-root users.
+3.  **`Dockerfile.dhi`**: Enterprise-grade security using `dhi.io` base images. Minimal attack surface with near-zero CVEs.
+
+### Using DHI
+
+To build the DHI version, you first need to login to the DHI registry:
+
+```bash
+docker login dhi.io
+```
+
+Then build as usual:
+
+```bash
+docker build -t lab-app:dhi -f Dockerfile.dhi .
+```
+
+For a detailed breakdown of the differences, see **[dhi_comparison.md](./dhi_comparison.md)**.

@@ -1,0 +1,48 @@
+# Dockerfile using Docker Hardened Image (DHI)
+# Base image from dhi.io - optimized for security and size
+# Requires `docker login dhi.io` before building
+
+# Phase 1: Builder
+FROM dhi.io/python:3.12-alpine3.20 AS builder
+
+WORKDIR /app
+
+# Upgrade pip and suppress warnings
+ENV PIP_ROOT_USER_ACTION=ignore \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --user -r requirements.txt
+
+# Phase 2: Runtime
+# Using the same hardened base for runtime
+FROM dhi.io/python:3.12-alpine3.20
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/home/appuser/.local/bin:${PATH}"
+
+WORKDIR /app
+
+# Copy dependencies from builder
+# DHI images often use a default non-root user 'appuser'
+COPY --from=builder /root/.local /home/appuser/.local
+COPY --from=builder /app /app
+
+# Copy application code with correct ownership
+COPY --chown=appuser:appuser app.py .
+
+# Switch to non-root user (already defined in DHI, but explicit for clarity)
+USER appuser
+
+# Healthcheck using Python
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD python3 -c 'import urllib.request; urllib.request.urlopen("http://localhost:5000/health")' || exit 1
+
+EXPOSE 5000
+
+# Use Gunicorn for production
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "app:app"]
