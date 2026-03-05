@@ -18,21 +18,21 @@ This project demonstrates container security best practices and automated vulner
 # Build standard image
 docker build -t security-lab:std -f Dockerfile.std .
 
-# Build hardened image
-docker build -t security-lab:hardened -f Dockerfile .
+# Build manually hardened image
+docker build -t security-lab:manually_hardened -f Dockerfile .
 ```
 
 ### Scan for Vulnerabilities
 
 ```bash
 docker scout quickview security-lab:std
-docker scout quickview security-lab:hardened
+docker scout quickview security-lab:manually_hardened
 ```
 
 ### Run Hardened Container
 
 ```bash
-docker run -d --name security-app -p 5001:5000 security-lab:hardened
+docker run -d --name security-app -p 5001:5000 security-lab:manually_hardened
 ```
 
 ## Hardening Features
@@ -77,24 +77,15 @@ docker inspect --format='{{json .State.Health}}' security-app
 
 We've introduced a third Dockerfile approach using **Docker Hardened Images (DHI)** for comparison.
 
-### Dockerfile Variants
+### Comparison Overview
 
-1.  **`Dockerfile.std`**: Standard, unhardened base. High attack surface.
-2.  **`Dockerfile`**: Manually hardened using multi-stage builds and non-root users.
-3.  **`Dockerfile.dhi`**: Enterprise-grade security using `dhi.io` base images. Minimal attack surface with near-zero CVEs.
-
-### Using DHI
-
-To build the DHI version, you first need to login to the DHI registry:
-
-```bash
-docker login dhi.io
-```
-
-Then build as usual:
-
-```bash
-docker build -t lab-app:dhi -f Dockerfile.dhi .
-```
+| Metric              | `Dockerfile.std`       | `Dockerfile` (manually_hardened) | `Dockerfile.dhi`                |
+| :------------------ | :--------------------- | :------------------------------- | :------------------------------ |
+| **Base Image**      | `python:3.9`           | `python:3.11-slim`               | **`dhi.io/python:3.12-alpine`** |
+| **Image Size**      | 463 MB                 | 56 MB                            | **~45 MB**                      |
+| **Packages**        | 638                    | 162                              | **~60**                         |
+| **Vulnerabilities** | C:0, H:27, M:61, L:171 | C:0, H:12, M:17, L:18            | **C:0, H:0, M:1, L:2**          |
+| **User**            | `root`                 | `appuser`                        | `appuser`                       |
+| **Attack Surface**  | High                   | Medium                           | **Very Low**                    |
 
 For a detailed breakdown of the differences, see **[dhi_comparison.md](./dhi_comparison.md)**.

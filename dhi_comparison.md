@@ -4,15 +4,15 @@ This report compares three Different Dockerfile approaches for the Python Flask 
 
 ## Comparison Overview
 
-| Feature                    | `Dockerfile.std`        | `Dockerfile` (Hardened) | `Dockerfile.dhi`               |
-| :------------------------- | :---------------------- | :---------------------- | :----------------------------- |
-| **Base Image**             | `python:3.9` (Official) | `python:3.11-slim`      | `dhi.io/python:3.12-alpine`    |
-| **Image Size**             | Large (~900MB+)         | Small (~150MB)          | **Extra Small (~50MB)**        |
-| **User**                   | `root` (Default)        | `appuser` (Custom)      | `appuser` (Built-in)           |
-| **Vulnerabilities (CVEs)** | Many (Standard)         | Fewer (Slim)            | **Near-Zero (Hardened)**       |
-| **Attack Surface**         | High (Full OS)          | Medium (Minimal)        | **Very Low (Distroless-like)** |
-| **Multi-Stage Build**      | No                      | Yes                     | Yes                            |
-| **Security Headers**       | Implemented in `app.py` | Implemented in `app.py` | Implemented in `app.py`        |
+| Metric              | `Dockerfile.std`       | `Dockerfile` (manually_hardened) | `Dockerfile.dhi`            |
+| :------------------ | :--------------------- | :------------------------------- | :-------------------------- |
+| **Base Image**      | `python:3.9`           | `python:3.11-slim-bullseye`      | `dhi.io/python:3.12-alpine` |
+| **Image Size**      | 463 MB                 | 56 MB                            | **~45 MB**                  |
+| **Packages**        | 638                    | 162                              | **~60**                     |
+| **Vulnerabilities** | C:0, H:27, M:61, L:171 | C:0, H:12, M:17, L:18            | **C:0, H:0, M:1, L:2**      |
+| **User**            | `root`                 | `appuser` (UID 1000)             | `appuser` (Built-in)        |
+| **Attack Surface**  | High (Full OS)         | Medium (Minimal)                 | **Very Low (DHI)**          |
+| **Build Pattern**   | Single Phase           | Multi-Stage                      | Multi-Stage                 |
 
 ## Key Differences
 

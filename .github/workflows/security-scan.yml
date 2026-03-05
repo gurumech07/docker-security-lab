@@ -84,14 +84,14 @@ jobs:
       - name: Build Images
         run: |
           docker build -t security-lab:std -f Dockerfile.std .
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:hardened -f Dockerfile .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:manually_hardened -f Dockerfile .
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:dhi -f Dockerfile.dhi .
 
       - name: Docker Scout Comparison (Hardened vs Std)
         uses: docker/scout-action@v1
         with:
           command: compare
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:hardened
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:manually_hardened
           to: security-lab:std
           ignore-unchanged: false
           only-severities: critical,high
@@ -117,5 +117,5 @@ jobs:
 
       - name: Push Images
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:hardened
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:manually_hardened
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/security-lab:dhi
